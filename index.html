@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Device Detectives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#20204a; --paper:#fff8ec; --navy:#2b2a4c; --gold:#ffc857;
+  --coral:#ff6f59; --mint:#4fb6a8; --card:#ffffff; --line:#e7ded0;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;}
+body{
+  height:100%;margin:0;
+  font-family:'Nunito',sans-serif;
+  background:var(--navy);
+  color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  overflow-x:hidden;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#241f38; --card:#2e2846; --ink:#f4efe3; --line:#463f5e; }
+}
+:root[data-theme="dark"]{ --paper:#241f38; --card:#2e2846; --ink:#f4efe3; --line:#463f5e; }
+
+.stage{
+  width:100%;max-width:820px;min-height:100vh;
+  background:radial-gradient(circle at 20% -10%, #3d3a6b 0%, var(--navy) 55%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:28px 20px 40px;
+  position:relative;
+}
+.badge-bar{
+  position:sticky;top:env(safe-area-inset-top,0px);
+  align-self:stretch;display:flex;justify-content:space-between;align-items:center;
+  color:var(--gold);font-family:'Baloo 2';font-weight:700;font-size:15px;
+  padding:6px 4px 14px;
+}
+.hidden{display:none !important;}
+.screen{width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;}
+h1{font-family:'Baloo 2';font-weight:800;font-size:clamp(30px,7vw,46px);color:var(--gold);margin:0;letter-spacing:.5px;}
+h2{font-family:'Baloo 2';font-weight:700;font-size:clamp(20px,5vw,28px);color:var(--paper);margin:0;}
+p{font-size:18px;color:var(--paper);margin:0;line-height:1.5;max-width:520px;}
+.magnify{font-size:70px;filter:drop-shadow(0 6px 0 rgba(0,0,0,.25));}
+.btn{
+  font-family:'Baloo 2';font-weight:700;font-size:20px;
+  background:var(--coral);color:#fff;border:none;border-radius:999px;
+  padding:16px 38px;cursor:pointer;box-shadow:0 6px 0 #c9503f;
+  transition:transform .08s;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #c9503f;}
+.btn.gold{background:var(--gold);color:var(--navy);box-shadow:0 6px 0 #cc9b34;}
+.btn.gold:active{box-shadow:0 2px 0 #cc9b34;}
+input[type="text"]{
+  font-family:'Nunito';font-weight:700;font-size:22px;
+  padding:14px 20px;border-radius:16px;border:3px solid var(--gold);
+  width:min(320px,80vw);text-align:center;background:var(--card);color:var(--ink);
+}
+.card{
+  background:var(--card);border-radius:24px;padding:22px;width:100%;
+  box-shadow:0 10px 0 rgba(0,0,0,.18);border:1px solid var(--line);
+}
+.qtag{font-family:'Baloo 2';font-weight:700;color:var(--coral);font-size:15px;}
+.qtext{font-family:'Baloo 2';font-weight:700;font-size:clamp(19px,4.5vw,25px);margin:8px 0 18px;color:var(--ink);}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px;}
+.choice{
+  background:var(--paper);border:3px solid var(--line);border-radius:18px;
+  padding:16px 8px;font-size:44px;cursor:pointer;user-select:none;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.choice span.lbl{font-family:'Nunito';font-weight:700;font-size:14px;color:var(--ink);}
+.choice:hover{border-color:var(--gold);}
+.choice.correct{background:#defbe6;border-color:var(--mint);}
+.choice.wrong{background:#ffe4e0;border-color:var(--coral);}
+.feedback{font-family:'Baloo 2';font-weight:700;font-size:20px;min-height:28px;}
+.feedback.good{color:var(--mint);}
+.feedback.bad{color:var(--coral);}
+.dragzone{position:relative;height:220px;background:var(--paper);border-radius:20px;border:3px dashed var(--line);}
+.drag-target{position:absolute;font-size:50px;touch-action:none;cursor:grab;user-select:none;}
+.hoop{position:absolute;bottom:16px;font-size:60px;opacity:.55;}
+.hoop-label{position:absolute;bottom:0;font-family:'Baloo 2';font-weight:700;font-size:13px;color:var(--ink);}
+.tasknote{font-size:15px;color:var(--paper);opacity:.85;}
+.progress{display:flex;gap:6px;justify-content:center;margin-top:6px;}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3);}
+.dot.on{background:var(--gold);}
+.certificate{background:var(--card);border-radius:24px;padding:30px 24px;border:4px solid var(--gold);width:100%;}
+.stars{font-size:34px;letter-spacing:6px;}
+footer-hint{font-size:13px;}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="badge-bar"><span id="detname">🔎 Detective</span><span id="starcount">⭐ 0</span></div>
+
+  <!-- SCREEN 0: TITLE -->
+  <section class="screen" id="s-title">
+    <div class="magnify">🕵️‍♀️🔍</div>
+    <h1>DEVICE DETECTIVES</h1>
+    <h2>Year 1 Computing Mission</h2>
+    <p>Can you become a Device Detective? Let's find, name and use digital devices — and practise our mouse skills!</p>
+    <button class="btn" id="btn-start">START</button>
+  </section>
+
+  <!-- SCREEN 1: NAME -->
+  <section class="screen hidden" id="s-name">
+    <div class="magnify">📋</div>
+    <h2>What is your name?</h2>
+    <p>Detective Name:</p>
+    <input type="text" id="nameInput" placeholder="Type your name" maxlength="18">
+    <button class="btn gold" id="btn-name-go">START MISSION</button>
+  </section>
+
+  <!-- SCREEN 2: ROUND 1 -->
+  <section class="screen hidden" id="s-r1">
+    <h2>Round 1 · Device Detective 🔎</h2>
+    <p class="tasknote">Spot the digital device!</p>
+    <div class="card">
+      <div class="qtag" id="r1tag">Question 1 of 4</div>
+      <div class="qtext" id="r1q">Which one is a digital device?</div>
+      <div class="choices" id="r1choices"></div>
+      <div class="feedback" id="r1fb"></div>
+    </div>
+    <div class="progress" id="r1dots"></div>
+  </section>
+
+  <!-- SCREEN 3: ROUND 2 -->
+  <section class="screen hidden" id="s-r2">
+    <h2>Round 2 · What's It For? 🤔</h2>
+    <p class="tasknote">Say your answer out loud, then tap the picture!</p>
+    <div class="card">
+      <div class="qtag" id="r2tag">Question 1 of 3</div>
+      <div class="qtext" id="r2q">What do we use a tablet for?</div>
+      <div class="choices" id="r2choices"></div>
+      <div class="feedback" id="r2fb"></div>
+    </div>
+    <div class="progress" id="r2dots"></div>
+  </section>
+
+  <!-- SCREEN 4: ROUND 3 MOUSE SKILLS -->
+  <section class="screen hidden" id="s-r3">
+    <h2>Round 3 · Mouse Skills 🖱️</h2>
+    <div class="card" id="r3card">
+      <div class="qtag" id="r3tag">Task 1 of 3 · Point &amp; Click</div>
+      <div class="qtext" id="r3instr">Tap the ⭐ star to find it!</div>
+      <div class="dragzone" id="r3zone"></div>
+      <div class="feedback" id="r3fb"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN 5: ROUND 4 HOME/SCHOOL -->
+  <section class="screen hidden" id="s-r4">
+    <h2>Round 4 · Home or School? 🏠🏫</h2>
+    <p class="tasknote">Drag the device into a group. There's no wrong answer — devices can live in both!</p>
+    <div class="card">
+      <div class="qtag" id="r4tag">Device 1 of 3</div>
+      <div class="dragzone" id="r4zone">
+        <div class="hoop" style="left:8%;">🏠</div>
+        <div class="hoop-label" style="left:6%;">Home</div>
+        <div class="hoop" style="right:8%;">🏫</div>
+        <div class="hoop-label" style="right:4%;">School</div>
+      </div>
+      <div class="feedback" id="r4fb"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN 6: CERTIFICATE -->
+  <section class="screen hidden" id="s-end">
+    <div class="magnify">🏆</div>
+    <div class="certificate">
+      <h2>Case Closed!</h2>
+      <p style="margin-top:6px;">Congratulations,</p>
+      <h1 id="certname" style="font-size:clamp(24px,6vw,34px);">Detective</h1>
+      <p>You spotted digital devices, explained what they're used for, practised point, click, double-click and drag — and began sorting devices into groups!</p>
+      <div class="stars" id="finalstars">⭐⭐⭐⭐⭐</div>
+    </div>
+    <button class="btn" id="btn-restart">PLAY AGAIN</button>
+  </section>
+</div>
+
+<script>
+let stars = 0, detectiveName = "Detective";
+const $ = id => document.getElementById(id);
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function addStar(fbEl, msg){
+  stars++; $('starcount').textContent = '⭐ ' + stars;
+  fbEl.textContent = '✅ ' + msg; fbEl.className='feedback good';
+}
+function missStar(fbEl, msg){
+  fbEl.textContent = '❌ ' + msg; fbEl.className='feedback bad';
+}
+
+$('btn-start').onclick = ()=> show('s-name');
+$('btn-name-go').onclick = ()=>{
+  const v = $('nameInput').value.trim();
+  detectiveName = v.length ? v : 'Detective';
+  $('detname').textContent = '🔎 ' + detectiveName;
+  show('s-r1'); renderR1();
+};
+
+/* ---------- ROUND 1 ---------- */
+const r1Data = [
+  {q:"Which one is a digital device?", choices:[
+    {e:'💻',l:'Laptop',ok:true},{e:'🍎',l:'Apple',ok:false},{e:'📖',l:'Book',ok:false},{e:'👟',l:'Shoe',ok:false}]},
+  {q:"Which one is a digital device?", choices:[
+    {e:'🌳',l:'Tree',ok:false},{e:'📱',l:'Phone',ok:true},{e:'🧸',l:'Teddy',ok:false},{e:'🍌',l:'Banana',ok:false}]},
+  {q:"Which one is a digital device?", choices:[
+    {e:'📺',l:'Smart TV',ok:true},{e:'🪑',l:'Chair',ok:false},{e:'🍩',l:'Donut',ok:false},{e:'🌂',l:'Umbrella',ok:false}]},
+  {q:"Which one is a digital device?", choices:[
+    {e:'🐶',l:'Dog',ok:false},{e:'⚽',l:'Ball',ok:false},{e:'📱',l:'Tablet',ok:true},{e:'🖍️',l:'Crayon',ok:false}]},
+];
+let r1i=0;
+function renderR1(){
+  const d = r1Data[r1i];
+  $('r1tag').textContent = `Question ${r1i+1} of ${r1Data.length}`;
+  $('r1q').textContent = d.q;
+  $('r1fb').textContent=''; $('r1fb').className='feedback';
+  const box = $('r1choices'); box.innerHTML='';
+  d.choices.forEach(c=>{
+    const el=document.createElement('div'); el.className='choice';
+    el.innerHTML = `${c.e}<span class="lbl">${c.l}</span>`;
+    el.onclick = ()=>{
+      document.querySelectorAll('#r1choices .choice').forEach(x=>x.style.pointerEvents='none');
+      if(c.ok){ el.classList.add('correct'); addStar($('r1fb'),'Great job! That is a digital device!'); }
+      else { el.classList.add('wrong'); missStar($('r1fb'),'Try again — that one is not a digital device.'); }
+      setTimeout(()=>{
+        r1i++;
+        if(r1i < r1Data.length) renderR1();
+        else { show('s-r2'); renderR2(); }
+      },1300);
+    };
+    box.appendChild(el);
+  });
+  $('r1dots').innerHTML = r1Data.map((_,i)=>`<div class="dot ${i<=r1i?'on':''}"></div>`).join('');
+}
+
+/* ---------- ROUND 2 ---------- */
+const r2Data = [
+  {q:"What do we use a tablet for?", choices:[
+    {e:'📚',l:'Reading & learning',ok:true},{e:'🍽️',l:'Eating dinner',ok:false},{e:'🛏️',l:'Sleeping',ok:false}]},
+  {q:"What can we use a phone for?", choices:[
+    {e:'🍳',l:'Cooking',ok:false},{e:'📞',l:'Talking to family',ok:true},{e:'🏊',l:'Swimming',ok:false}]},
+  {q:"What do we use a computer for?", choices:[
+    {e:'🧩',l:'Playing & learning games',ok:true},{e:'🧴',l:'Washing hair',ok:false},{e:'🚗',l:'Driving',ok:false}]},
+];
+let r2i=0;
+function renderR2(){
+  const d = r2Data[r2i];
+  $('r2tag').textContent = `Question ${r2i+1} of ${r2Data.length}`;
+  $('r2q').textContent = d.q;
+  $('r2fb').textContent=''; $('r2fb').className='feedback';
+  const box = $('r2choices'); box.innerHTML='';
+  d.choices.forEach(c=>{
+    const el=document.createElement('div'); el.className='choice';
+    el.innerHTML = `${c.e}<span class="lbl">${c.l}</span>`;
+    el.onclick = ()=>{
+      document.querySelectorAll('#r2choices .choice').forEach(x=>x.style.pointerEvents='none');
+      if(c.ok){ el.classList.add('correct'); addStar($('r2fb'),'Yes! Well done, Detective.'); }
+      else { el.classList.add('wrong'); missStar($('r2fb'),'Try again — think about what it helps us do.'); }
+      setTimeout(()=>{
+        r2i++;
+        if(r2i < r2Data.length) renderR2();
+        else { show('s-r3'); renderR3(); }
+      },1300);
+    };
+    box.appendChild(el);
+  });
+  $('r2dots').innerHTML = r2Data.map((_,i)=>`<div class="dot ${i<=r2i?'on':''}"></div>`).join('');
+}
+
+/* ---------- ROUND 3: MOUSE SKILLS ---------- */
+let r3i = 0;
+function renderR3(){
+  const zone = $('r3zone'); zone.innerHTML=''; $('r3fb').textContent=''; $('r3fb').className='feedback';
+  if(r3i===0){
+    $('r3tag').textContent='Task 1 of 3 · Point & Click';
+    $('r3instr').textContent='Tap the ⭐ star to find it!';
+    const items=['🍎','⭐','🐝','🧦'];
+    items.forEach((e,idx)=>{
+      const d=document.createElement('div'); d.className='drag-target'; d.textContent=e;
+      d.style.left = (12+idx*22)+'%'; d.style.top = (60+ (idx%2)*40)+'px';
+      d.onclick = ()=>{
+        if(e==='⭐'){ addStar($('r3fb'),'Perfect point-and-click!'); setTimeout(next3,1200);}
+        else { missStar($('r3fb'),'Not that one — try again!'); }
+      };
+      zone.appendChild(d);
+    });
+  } else if(r3i===1){
+    $('r3tag').textContent='Task 2 of 3 · Double-Click';
+    $('r3instr').textContent='Double-tap the 📦 box to open it!';
+    const box=document.createElement('div'); box.className='drag-target'; box.textContent='📦';
+    box.style.left='42%'; box.style.top='70px';
+    box.ondblclick = ()=>{ box.textContent='💻'; addStar($('r3fb'),'You opened it — a laptop was inside!'); setTimeout(next3,1200); };
+    zone.appendChild(box);
+    const hint=document.createElement('div'); hint.style.position='absolute'; hint.style.bottom='10px'; hint.style.left='50%'; hint.style.transform='translateX(-50%)';
+    hint.style.fontSize='13px'; hint.textContent='(tap twice, quickly)'; zone.appendChild(hint);
+  } else {
+    $('r3tag').textContent='Task 3 of 3 · Click-and-Drag';
+    $('r3instr').textContent='Drag the 💻 into the circle ⭕';
+    const target=document.createElement('div'); target.className='drag-target'; target.id='dragItem'; target.textContent='💻';
+    target.style.left='15%'; target.style.top='70px';
+    const ring=document.createElement('div'); ring.style.position='absolute'; ring.style.right='15%'; ring.style.top='60px';
+    ring.style.fontSize='70px'; ring.style.opacity='.5'; ring.textContent='⭕';
+    zone.appendChild(ring); zone.appendChild(target);
+    let dragging=false, offX=0, offY=0;
+    target.addEventListener('pointerdown', e=>{
+      dragging=true; target.setPointerCapture(e.pointerId);
+      const r=target.getBoundingClientRect(); offX=e.clientX-r.left; offY=e.clientY-r.top;
+    });
+    target.addEventListener('pointermove', e=>{
+      if(!dragging) return;
+      const zr=zone.getBoundingClientRect();
+      target.style.left = (e.clientX - zr.left - offX) + 'px';
+      target.style.top = (e.clientY - zr.top - offY) + 'px';
+    });
+    target.addEventListener('pointerup', e=>{
+      dragging=false;
+      const tr=target.getBoundingClientRect(), rr=ring.getBoundingClientRect();
+      const overlap = !(tr.right<rr.left || tr.left>rr.right || tr.bottom<rr.top || tr.top>rr.bottom);
+      if(overlap){ addStar($('r3fb'),'Fantastic click-and-drag!'); target.style.pointerEvents='none'; setTimeout(()=>{show('s-r4'); renderR4();},1200); }
+      else missStar($('r3fb'),'Almost — drag it right into the circle!');
+    });
+  }
+}
+function next3(){ r3i++; renderR3(); }
+
+/* ---------- ROUND 4: HOME/SCHOOL ---------- */
+const r4Data=['💻','📱','📺'];
+let r4i=0;
+function renderR4(){
+  $('r4fb').textContent=''; $('r4fb').className='feedback';
+  $('r4tag').textContent = `Device ${r4i+1} of ${r4Data.length}`;
+  const zone=$('r4zone');
+  document.querySelectorAll('#r4zone .drag-target').forEach(n=>n.remove());
+  const item=document.createElement('div'); item.className='drag-target'; item.textContent=r4Data[r4i];
+  item.style.left='45%'; item.style.top='30px';
+  zone.appendChild(item);
+  let dragging=false, offX=0, offY=0;
+  item.addEventListener('pointerdown', e=>{
+    dragging=true; item.setPointerCapture(e.pointerId);
+    const r=item.getBoundingClientRect(); offX=e.clientX-r.left; offY=e.clientY-r.top;
+  });
+  item.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const zr=zone.getBoundingClientRect();
+    item.style.left=(e.clientX-zr.left-offX)+'px';
+    item.style.top=(e.clientY-zr.top-offY)+'px';
+  });
+  item.addEventListener('pointerup', e=>{
+    dragging=false;
+    const zr=zone.getBoundingClientRect();
+    const x = e.clientX - zr.left;
+    const side = x < zr.width/2 ? 'Home 🏠' : 'School 🏫';
+    addStar($('r4fb'), `Great sorting! That could belong in ${side}.`);
+    item.style.pointerEvents='none';
+    setTimeout(()=>{
+      r4i++;
+      if(r4i<r4Data.length) renderR4();
+      else finish();
+    },1300);
+  });
+}
+function finish(){
+  $('certname').textContent = detectiveName;
+  const full = Math.min(5, Math.max(1, Math.round(stars/ (r1Data.length+r2Data.length+3+r4Data.length) * 5)));
+  $('finalstars').textContent = '⭐'.repeat(full) + '☆'.repeat(5-full);
+  show('s-end');
+}
+$('btn-restart').onclick = ()=>{
+  stars=0; r1i=0; r2i=0; r3i=0; r4i=0; $('starcount').textContent='⭐ 0';
+  show('s-title');
+};
+</script>
+</body>
+</html>
